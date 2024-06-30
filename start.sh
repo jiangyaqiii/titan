@@ -7,6 +7,10 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
+echo "\$nrconf{kernelhints} = 0;" >> /etc/needrestart/needrestart.conf
+echo "\$nrconf{restart} = 'l';" >> /etc/needrestart/needrestart.conf
+echo "ulimit -v 640000;" >> ~/.bashrc
+
 function install_node() {
 
 # 读取加载身份码信息
@@ -84,3 +88,4 @@ done
 echo "==============================所有节点均已设置并启动==================================="
 
 }
+install_node
