@@ -44,7 +44,7 @@ function install_node() {
 
 
     # 更新和安装必要的软件
-    sudo apt update && sudo apt upgrade -y
+    sudo apt update -y
     sudo apt install -y curl iptables build-essential git wget jq make gcc nano tmux htop nvme-cli pkg-config libssl-dev libleveldb-dev tar clang bsdmainutils ncdu unzip libleveldb-dev lz4 snapd
 
     # 安装 Go
