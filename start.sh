@@ -31,7 +31,7 @@ else
 fi
 
 # 拉取Docker镜像
-docker pull nezha123/titan-edge:1.6_amd64
+docker pull nezha123/titan-edge
 
 # 创建用户指定数量的容器
 current_rpc_port=30000
@@ -52,7 +52,7 @@ sleep 30
 docker exec $container_id bash -c "\
     sed -i 's/^[[:space:]]*#StorageGB = .*/StorageGB = 50/' /root/.titanedge/config.toml && \
     sed -i 's/^[[:space:]]*#ListenAddress = \"0.0.0.0:1234\"/ListenAddress = \"0.0.0.0:$current_rpc_port\"/' /root/.titanedge/config.toml && \
-    echo '容器 titan 的存储空间设置为 30 GB，RPC 端口设置为 $current_rpc_port'"
+    echo '容器 titan 的存储空间设置为 50 GB，RPC 端口设置为 $current_rpc_port'"
 
 # 重启容器以让设置生效
 docker restart $container_id
