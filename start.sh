@@ -19,16 +19,7 @@ read -p "输入你的身份码: " id
 # 让用户输入想要创建的容器数量
 read -p "请输入你想要创建的节点数量，单IP限制最多5个节点: " container_count
 
-# 让用户输入起始 RPC 端口号
-read -p "请输入你想要设置的起始 RPC端口 （端口号请自行设定，开启5个节点端口将会依次数字顺延，建议输入30000即可）: " start_rpc_port
-
-# 让用户输入想要分配的空间大小
-read -p "请输入你想要分配每个节点的存储空间大小（GB），单个上限2T, 网页生效较慢，等待20分钟后，网页查询即可: " storage_gb
-
-# 让用户输入存储路径（可选）
-read -p "请输入节点存储数据的宿主机路径（直接回车将使用默认路径 titan_storage_$i,依次数字顺延）: " custom_storage_path
-
-apt update
+apt update -y
 
 # 检查 Docker 是否已安装
 if ! command -v docker &> /dev/null
@@ -46,44 +37,33 @@ fi
 docker pull nezha123/titan-edge:1.6_amd64
 
 # 创建用户指定数量的容器
-for ((i=1; i<=container_count; i++))
-do
-    current_rpc_port=$((start_rpc_port + i - 1))
+current_rpc_port=(30000 + i - 1)
 
-    # 判断用户是否输入了自定义存储路径
-    if [ -z "$custom_storage_path" ]; then
-        # 用户未输入，使用默认路径
-        storage_path="$PWD/titan_storage_$i"
-    else
-        # 用户输入了自定义路径，使用用户提供的路径
-        storage_path="$custom_storage_path"
-    fi
+storage_path="$PWD/titan_storage_$i"
 
-    # 确保存储路径存在
-    mkdir -p "$storage_path"
+# 确保存储路径存在
+mkdir -p "$storage_path"
 
-    # 运行容器，并设置重启策略为always
-    container_id=$(docker run -d --restart always -v "$storage_path:/root/.titanedge/storage" --name "titan$i" --net=host  nezha123/titan-edge:1.6_amd64)
+# 运行容器，并设置重启策略为always
+container_id=$(docker run -d --restart always -v "$storage_path:/root/.titanedge/storage" --name "titan$i" --net=host  nezha123/titan-edge:1.6_amd64)
 
-    echo "节点 titan$i 已经启动 容器ID $container_id"
+echo "节点 titan$i 已经启动 容器ID $container_id"
 
-    sleep 30
+sleep 30
 
-    # 修改宿主机上的config.toml文件以设置StorageGB值和端口
-    docker exec $container_id bash -c "\
-        sed -i 's/^[[:space:]]*#StorageGB = .*/StorageGB = $storage_gb/' /root/.titanedge/config.toml && \
-        sed -i 's/^[[:space:]]*#ListenAddress = \"0.0.0.0:1234\"/ListenAddress = \"0.0.0.0:$current_rpc_port\"/' /root/.titanedge/config.toml && \
-        echo '容器 titan'$i' 的存储空间设置为 $storage_gb GB，RPC 端口设置为 $current_rpc_port'"
+# 修改宿主机上的config.toml文件以设置StorageGB值和端口
+docker exec $container_id bash -c "\
+    sed -i 's/^[[:space:]]*#StorageGB = .*/StorageGB = 30/' /root/.titanedge/config.toml && \
+    sed -i 's/^[[:space:]]*#ListenAddress = \"0.0.0.0:1234\"/ListenAddress = \"0.0.0.0:$current_rpc_port\"/' /root/.titanedge/config.toml && \
+    echo '容器 titan'$i' 的存储空间设置为 30 GB，RPC 端口设置为 $current_rpc_port'"
 
-    # 重启容器以让设置生效
-    docker restart $container_id
+# 重启容器以让设置生效
+docker restart $container_id
 
-    # 进入容器并执行绑定命令
-    docker exec $container_id bash -c "\
-        titan-edge bind --hash=$id https://api-test1.container1.titannet.io/api/v2/device/binding"
-    echo "节点 titan$i 已绑定."
-
-done
+# 进入容器并执行绑定命令
+docker exec $container_id bash -c "\
+    titan-edge bind --hash=$id https://api-test1.container1.titannet.io/api/v2/device/binding"
+echo "节点 titan$i 已绑定."
 
 echo "==============================所有节点均已设置并启动==================================="
 
