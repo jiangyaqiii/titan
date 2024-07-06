@@ -42,7 +42,7 @@ storage_path="$PWD/titan_storage"
 mkdir -p "$storage_path"
 
 # 运行容器，并设置重启策略为always
-container_id=$(docker run -d --restart always -v "$storage_path:/root/.titanedge/storage" --name "titan" --net=host  nezha123/titan-edge:1.6_amd64)
+container_id=$(docker run -d --restart always -v "$storage_path:/root/.titanedge/storage" --name "titan" --net=host  nezha123/titan-edge)
 
 echo "节点 titan 已经启动 容器ID $container_id"
 
@@ -50,7 +50,7 @@ sleep 30
 
 # 修改宿主机上的config.toml文件以设置StorageGB值和端口
 docker exec $container_id bash -c "\
-    sed -i 's/^[[:space:]]*#StorageGB = .*/StorageGB = 30/' /root/.titanedge/config.toml && \
+    sed -i 's/^[[:space:]]*#StorageGB = .*/StorageGB = 50/' /root/.titanedge/config.toml && \
     sed -i 's/^[[:space:]]*#ListenAddress = \"0.0.0.0:1234\"/ListenAddress = \"0.0.0.0:$current_rpc_port\"/' /root/.titanedge/config.toml && \
     echo '容器 titan 的存储空间设置为 30 GB，RPC 端口设置为 $current_rpc_port'"
 
