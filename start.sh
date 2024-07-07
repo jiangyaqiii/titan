@@ -14,7 +14,7 @@ echo "ulimit -v 640000;" >> ~/.bashrc
 function install_node() {
 
 # 读取加载身份码信息
-read -p "输入你的身份码: " id
+echo "$id"
 
 apt update -y
 
